@@ -72,9 +72,3 @@ jobs:
           region: ${{ env.REGION }}
           image: ${{ env.IMAGE_NAME }}
           flags: "--allow-unauthenticated --port=8080"
-          secrets: |
-            DB_USER=projects/${{ secrets.GCP_PROJECT_ID }}/secrets/DB_USER/versions/latest
-            DB_PASSWORD=projects/${{ secrets.GCP_PROJECT_ID }}/secrets/DB_PASSWORD/versions/latest
-            DB_HOST=projects/${{ secrets.GCP_PROJECT_ID }}/secrets/DB_HOST/versions/latest
-            DB_PORT=projects/${{ secrets.GCP_PROJECT_ID }}/secrets/DB_PORT/versions/latest
-            DB_NAME=projects/${{ secrets.GCP_PROJECT_ID }}/secrets/DB_NAME/versions/latest

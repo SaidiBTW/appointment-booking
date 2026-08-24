@@ -11,7 +11,7 @@ import (
 )
 
 func NewPostgresDB(cfg *config.PostgresConfig) (*sql.DB, error) {
-	connStr := "host=" + cfg.Host + " port=" + strconv.Itoa(cfg.Port) + " user=" + cfg.User + " password=" + cfg.Password + " dbname=" + cfg.DBName + " sslmode=" + cfg.SSLMode
+	connStr := "host=" + cfg.Host + " port=" + strconv.Itoa(cfg.Port) + " user=" + cfg.User + " password=" + cfg.Password + " dbname=" + cfg.DBName + " sslmode=disable"
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		db.Close()
