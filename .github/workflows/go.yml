@@ -46,6 +46,7 @@ jobs:
     if: github.ref == 'refs/heads/release' && github.event_name == 'push'
     runs-on: ubuntu-latest
     env:
+      PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       GCP_CREDENTIALS_JSON: ${{ secrets.GCP_SA_KEY }}
     steps:
       - name: Checkout Repository
