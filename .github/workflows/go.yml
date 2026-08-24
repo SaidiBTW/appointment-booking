@@ -84,8 +84,6 @@ jobs:
           region: ${{ env.REGION }}
           image: ${{ env.IMAGE_NAME }}
           flags: "--allow-unauthenticated --port=8080"
-          env_vars: |
-            DATABASE_SSLMODE=disable
           secrets: |
             DATABASE_USER=projects/${{ secrets.GCP_PROJECT_ID }}/secrets/DB_USER/versions/latest
             DATABASE_PASSWORD=projects/${{ secrets.GCP_PROJECT_ID }}/secrets/DB_PASSWORD/versions/latest
