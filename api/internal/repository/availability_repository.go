@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"log"
 	"time"
@@ -51,8 +52,12 @@ func (r *availabilityRepository) GetAvailableSlots(doctorID string, date time.Ti
 	}
 
 	var slots []AppointmentSlot
-	for _, q := range query {
-		slots = append(slots, generateTimeSlots(q.StartTime, q.EndTime, 30*time.Minute)...)
+
+	for _, schedule := range query {
+		fmt.Printf("Schedule for doctorID: %s on dayOfWeek: %d is from %s to %s\n", doctorID, dayOfWeek, schedule.StartTime, schedule.EndTime)
+		startTime := time.Date(date.Year(), date.Month(), date.Day(), schedule.StartTime.Hour(), schedule.StartTime.Minute(), schedule.StartTime.Second(), 0, time.UTC)
+		endTime := time.Date(date.Year(), date.Month(), date.Day(), schedule.EndTime.Hour(), schedule.EndTime.Minute(), schedule.EndTime.Second(), 0, time.UTC)
+		slots = append(slots, generateTimeSlots(startTime, endTime, 30*time.Minute)...)
 	}
 
 	appointments, err := r.GetAppointmentsByDoctorID(doctorID, date)

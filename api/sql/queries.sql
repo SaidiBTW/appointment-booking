@@ -50,3 +50,6 @@ INSERT INTO schedules (doctor_id, day_of_week, start_time, end_time) VALUES ($1,
 -- name: GetDoctors :many
 SELECT * FROM doctors;
 
+-- name: GetPatients :many
+SELECT * FROM patients;
+

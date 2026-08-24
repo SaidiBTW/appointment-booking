@@ -9,11 +9,14 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/lib/pq"
 	_ "github.com/lib/pq"
+
+	"errors"
 
 	"github.com/SaidiBTW/appointment_booking_system_go/internal/domain"
 	"github.com/SaidiBTW/appointment_booking_system_go/internal/dto"
-	"github.com/SaidiBTW/appointment_booking_system_go/internal/errors"
+	custom_errors "github.com/SaidiBTW/appointment_booking_system_go/internal/errors"
 	"github.com/SaidiBTW/appointment_booking_system_go/internal/repository/gen_queries"
 )
 
@@ -23,7 +26,7 @@ type AppointmentRepository interface {
 	GetAppointmentsByDoctorID(doctorID string) ([]*domain.Appointment, error)
 	GetAppointmentsByPatientID(patientID string) ([]*domain.Appointment, error)
 	RescheduleAppointment(appointmentID string, newStartTime time.Time, newEndTime time.Time) (*domain.Appointment, error)
-	CancelAppointment(appointmentID string, patientID string, reason string) error
+	CancelAppointment(appointmentID string, patientID string, reason string) (*domain.AppointmentCancellation, error)
 }
 
 type appointmentRepository struct {
@@ -51,7 +54,14 @@ func (r *appointmentRepository) CreateAppointment(appointmentDto dto.CreateAppoi
 	})
 
 	if err != nil {
-		return nil, err
+		// Check whether error is due to a unique constraint violation (appointment already exists)
+		var pqErr *pq.Error
+
+		if errors.As(err, &pqErr) && pqErr.Code == "23503" {
+			return nil, custom_errors.BadRequestError("Appointment already exists", err)
+		}
+
+		return nil, custom_errors.InternalServerError(err)
 	}
 	var appointment domain.Appointment
 
@@ -95,7 +105,7 @@ func (r *appointmentRepository) RescheduleAppointment(appointmentID string, newS
 		return nil, err
 	}
 	if len(appointmentsInRange) > 0 {
-		return nil, errors.BadRequestError("Appointment time conflicts with existing appointments", fmt.Errorf("appointment time conflicts with existing appointments"))
+		return nil, custom_errors.BadRequestError("Appointment time conflicts with existing appointments", fmt.Errorf("appointment time conflicts with existing appointments"))
 	}
 	appointment, updateError := queries.UpdateAppointment(ctx, gen_queries.UpdateAppointmentParams{
 		PatientID: uuid.NullUUID{},
@@ -117,22 +127,27 @@ func (r *appointmentRepository) RescheduleAppointment(appointmentID string, newS
 	}, nil
 }
 
-func (r *appointmentRepository) CancelAppointment(appointmentID string, patientID string, reason string) error {
+func (r *appointmentRepository) CancelAppointment(appointmentID string, patientID string, reason string) (*domain.AppointmentCancellation, error) {
 	ctx := context.Background()
 	queries := gen_queries.New(r.db)
-	_, err := queries.AddAppointmentCancellation(ctx, gen_queries.AddAppointmentCancellationParams{
+	cancellation, err := queries.AddAppointmentCancellation(ctx, gen_queries.AddAppointmentCancellationParams{
 		AppointmentID: uuid.MustParse(appointmentID),
 		PatientID:     uuid.MustParse(patientID),
 		Reason:        reason,
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 	err = queries.UpdateAppointmentStatus(ctx, gen_queries.UpdateAppointmentStatusParams{
 		Status: "canceled",
 		ID:     uuid.MustParse(appointmentID),
 	})
-	return err
+	return &domain.AppointmentCancellation{
+		ID:            cancellation.ID.String(),
+		AppointmentID: cancellation.AppointmentID.String(),
+		PatientID:     cancellation.PatientID.String(),
+		Reason:        cancellation.Reason,
+	}, err
 }
 
 func (r *appointmentRepository) GetAppointmentsByDoctorID(doctorID string) ([]*domain.Appointment, error) {

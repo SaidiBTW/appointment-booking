@@ -85,15 +85,13 @@ func (h *AppointmentHandler) CancelAppointment(ctx *gin.Context) {
 		return
 	}
 
-	err := h.svc.CancelAppointment(appointmentID, patientID, reason)
+	appointment_cancellation, err := h.svc.CancelAppointment(appointmentID, patientID, reason)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errors.InternalServerError(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"Message": "Appointment canceled successfully",
-	})
+	ctx.JSON(http.StatusOK, appointment_cancellation)
 }
 
 func (h *AppointmentHandler) RescheduleAppointment(ctx *gin.Context) {

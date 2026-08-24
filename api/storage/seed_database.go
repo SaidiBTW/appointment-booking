@@ -36,8 +36,8 @@ func SeedDatabase(db *sql.DB) {
 			queries.CreateSchedule(ctx, gen_queries.CreateScheduleParams{
 				DoctorID:  doctor.ID,
 				DayOfWeek: int16(dayOfWeek),
-				StartTime: (func() time.Time { n, _ := time.Parse(time.TimeOnly, "09:00"); return n })(),
-				EndTime:   (func() time.Time { n, _ := time.Parse(time.TimeOnly, "17:00"); return n })(),
+				StartTime: (func() time.Time { n, _ := time.Parse(time.TimeOnly, "09:00:00"); return n })(),
+				EndTime:   (func() time.Time { n, _ := time.Parse(time.TimeOnly, "17:00:00"); return n })(),
 			})
 		}
 	}

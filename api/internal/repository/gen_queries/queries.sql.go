@@ -303,6 +303,33 @@ func (q *Queries) GetDoctors(ctx context.Context) ([]Doctor, error) {
 	return items, nil
 }
 
+const getPatients = `-- name: GetPatients :many
+SELECT id, name, email FROM patients
+`
+
+func (q *Queries) GetPatients(ctx context.Context) ([]Patient, error) {
+	rows, err := q.db.QueryContext(ctx, getPatients)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Patient
+	for rows.Next() {
+		var i Patient
+		if err := rows.Scan(&i.ID, &i.Name, &i.Email); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUpcomingAppointmentsByPatientID = `-- name: GetUpcomingAppointmentsByPatientID :many
 SELECT id, patient_id, doctor_id, start_time, end_time, status FROM appointments WHERE patient_id = $1 AND start_time > CURRENT_TIMESTAMP ORDER BY start_time DESC
 `

@@ -10,7 +10,7 @@ import (
 
 type AppointmentService interface {
 	CreateAppointment(appointmentDto dto.CreateAppointmentRequest) (*domain.Appointment, error)
-	CancelAppointment(appointmentID string, patientID string, reason string) error
+	CancelAppointment(appointmentID string, patientID string, reason string) (*domain.AppointmentCancellation, error)
 	RescheduleAppointment(appointmentID string, newStartTime time.Time, newEndTime time.Time) (*domain.Appointment, error)
 	GetAppointmentsByPatientID(patientID string) ([]*domain.Appointment, error)
 }
@@ -30,7 +30,7 @@ func (s *appointmentService) CreateAppointment(appointmentDto dto.CreateAppointm
 	return s.appointmentRepository.CreateAppointment(appointmentDto)
 }
 
-func (s *appointmentService) CancelAppointment(appointmentID string, patientID string, reason string) error {
+func (s *appointmentService) CancelAppointment(appointmentID string, patientID string, reason string) (*domain.AppointmentCancellation, error) {
 	return s.appointmentRepository.CancelAppointment(appointmentID, patientID, reason)
 }
 

@@ -21,7 +21,7 @@ import (
 
 type MockAppointmentService interface {
 	CreateAppointment(appointmentDto dto.CreateAppointmentRequest) (*domain.Appointment, error)
-	CancelAppointment(appointmentID string, patientID string, reason string) error
+	CancelAppointment(appointmentID string, patientID string, reason string) (*domain.AppointmentCancellation, error)
 	RescheduleAppointment(appointmentID string, newStartTime time.Time, newEndTime time.Time) (*domain.Appointment, error)
 	GetAppointmentsByPatientID(patientID string) ([]*domain.Appointment, error)
 }
@@ -64,13 +64,18 @@ func (m *mockAppointmentService) CreateAppointment(appointmentDto dto.CreateAppo
 		PatientID: appointmentDto.PatientID,
 		StartTime: appointmentDto.StartTime,
 		EndTime:   appointmentDto.EndTime,
-		Status:    "Scheduled",
+		Status:    "scheduled",
 	}, nil
 }
 
-func (m *mockAppointmentService) CancelAppointment(appointmentID string, patientID string, reason string) error {
+func (m *mockAppointmentService) CancelAppointment(appointmentID string, patientID string, reason string) (*domain.AppointmentCancellation, error) {
 	// Mock implementation for canceling an appointment
-	return nil
+	return &domain.AppointmentCancellation{
+		ID:            "mock-cancellation-id",
+		AppointmentID: appointmentID,
+		PatientID:     patientID,
+		Reason:        reason,
+	}, nil
 }
 
 func (m *mockAppointmentService) RescheduleAppointment(appointmentID string, newStartTime time.Time, newEndTime time.Time) (*domain.Appointment, error) {

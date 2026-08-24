@@ -42,6 +42,18 @@ func main() {
 
 	availabilityHandler := handler.NewAvailabilityHandler(availabilityService)
 
+	patientRepo := repository.NewPostgresPatientRepository(db)
+
+	patientService := service.NewPatientService(patientRepo)
+
+	patientHandler := handler.NewPatientHandler(patientService)
+
+	doctorRepo := repository.NewPostgresDoctorRepository(db)
+
+	doctorService := service.NewDoctorService(doctorRepo)
+
+	doctorHandler := handler.NewDoctorHandler(doctorService)
+
 	router := gin.Default()
 
 	router.Use(middleware.ErrorHandler())
@@ -54,9 +66,11 @@ func main() {
 	}
 	{
 		api.GET("/doctors/:id/availability", availabilityHandler.GetAvailability)
+		api.GET("/doctors", doctorHandler.GetDoctors)
 	}
 	{
 		api.GET("/patients/:id/appointments", appointmentHandler.GetAppointmentsByPatientID)
+		api.GET("/patients", patientHandler.GetPatients)
 	}
 	{
 		api.GET("/health", func(ctx *gin.Context) {
