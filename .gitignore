@@ -1,0 +1,32 @@
+# Environment variables & secrets
+*.env
+*.env.*
+!.env.example
+.env
+
+run-docker.sh
+
+# Test coverage & binaries
+*.out
+*.cover
+*.test
+bin/
+dist/
+server
+
+# Operating System & IDE files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker local data mounts / logs
+*.log
+docker-data/
