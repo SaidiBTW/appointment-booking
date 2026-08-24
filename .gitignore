@@ -5,6 +5,7 @@
 .env
 
 run-docker.sh
+run-built-image.sh
 
 # Test coverage & binaries
 *.out
