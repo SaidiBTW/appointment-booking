@@ -24,7 +24,7 @@ func TestLoadUsesDefaultSSLModeWhenNotProvided(t *testing.T) {
 	}
 }
 
-func TestLoadFallsBackToDefaultConfigWhenRequiredValueMissing(t *testing.T) {
+func TestLoadFallsBackToDefaultConfigWhenDBNameMissing(t *testing.T) {
 	t.Setenv("DATABASE_HOST", "db.internal")
 	t.Setenv("DATABASE_PORT", "5432")
 	t.Setenv("DATABASE_USER", "app")

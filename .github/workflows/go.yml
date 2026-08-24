@@ -85,8 +85,8 @@ jobs:
           image: ${{ env.IMAGE_NAME }}
           flags: "--allow-unauthenticated --port=8080"
           secrets: |
-            DATABASE_USER=projects/${{ secrets.GCP_PROJECT_ID }}/secrets/DB_USER/versions/latest
-            DATABASE_PASSWORD=projects/${{ secrets.GCP_PROJECT_ID }}/secrets/DB_PASSWORD/versions/latest
-            DATABASE_HOST=projects/${{ secrets.GCP_PROJECT_ID }}/secrets/DB_HOST/versions/latest
-            DATABASE_PORT=projects/${{ secrets.GCP_PROJECT_ID }}/secrets/DB_PORT/versions/latest
-            DATABASE_NAME=projects/${{ secrets.GCP_PROJECT_ID }}/secrets/DB_NAME/versions/latest
+            DATABASE_USER=projects/${{ env.PROJECT_ID }}/secrets/DB_USER/versions/latest
+            DATABASE_PASSWORD=projects/${{ env.PROJECT_ID }}/secrets/DB_PASSWORD/versions/latest
+            DATABASE_HOST=projects/${{ env.PROJECT_ID }}/secrets/DB_HOST/versions/latest
+            DATABASE_PORT=projects/${{ env.PROJECT_ID }}/secrets/DB_PORT/versions/latest
+            DATABASE_NAME=projects/${{ env.PROJECT_ID }}/secrets/DB_NAME/versions/latest
