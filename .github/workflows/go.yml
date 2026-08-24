@@ -27,7 +27,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.26.5'
+          go-version: "1.26.5"
           cache-dependency-path: api/go.sum
 
       - name: Install Dependencies
@@ -71,4 +71,10 @@ jobs:
           service: ${{ env.SERVICE_NAME }}
           region: ${{ env.REGION }}
           image: ${{ env.IMAGE_NAME }}
-          flags: '--allow-unauthenticated --port=8080'
+          flags: "--allow-unauthenticated --port=8080"
+          secrets: |
+            DB_USER=projects/${{ secrets.GCP_PROJECT_ID }}/secrets/DB_USER/versions/latest
+            DB_PASSWORD=projects/${{ secrets.GCP_PROJECT_ID }}/secrets/DB_PASSWORD/versions/latest
+            DB_HOST=projects/${{ secrets.GCP_PROJECT_ID }}/secrets/DB_HOST/versions/latest
+            DB_PORT=projects/${{ secrets.GCP_PROJECT_ID }}/secrets/DB_PORT/versions/latest
+            DB_NAME=projects/${{ secrets.GCP_PROJECT_ID }}/secrets/DB_NAME/versions/latest
