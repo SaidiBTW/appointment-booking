@@ -37,40 +37,46 @@ Data in this system has been pre-seeded. By running the app locally using the `E
 
 The Examples that follow use `UUIDs` that may drift and hence fail to work. hence after seeding make sure your query the `/patient` and `/doctor` endpoints to get the respective values to substitute in the example.
 
+### Create Appointments
+
+```bash
 curl --location 'https://appointment-booking-1020741950373.africa-south1.run.app/api/v1/appointments' \
 --header 'Content-Type: application/json' \
 --data '{
-    "patient_id": "102ea001-cb5b-4f69-8751-57f523d6a55c",
-    "doctor_id": "044abfea-b424-43c0-8071-2fb14d5b1a6b",
-    "start_time": "2026-09-25T11:01:05+03:00",
-    "end_time": "2026-09-25T11:31:05+03:00",
-    "status": "scheduled"
+"patient_id": "{patient_id}",
+"doctor_id": "{doctor_id}",
+"start_time": "{start_time}",
+"end_time": "{end_time}",
+"status": "scheduled"
 }'
-
 ```
 
 ### Get Slots
 
 ```bash
-curl --location 'https://appointment-booking-1020741950373.africa-south1.run.app/api/v1/doctors/044abfea-b424-43c0-8071-2fb14d5b1a6b/availability?date=2026-09-25'
+curl --location 'https://appointment-booking-1020741950373.africa-south1.run.app/api/v1/doctors/{:doctor_id}/availability?date={date}'
+# The date format should be 2026-09-25
 ```
 
 ### Cancel Appointment
 
 ```bash
-curl --location --request PATCH 'https://appointment-booking-1020741950373.africa-south1.run.app/api/v1/appointments/cc67cae9-4b5d-4c97-b030-95927df6eab6/cancel?reason=Had%20an%20emergency'
+curl --location --request PATCH 'https://appointment-booking-1020741950373.africa-south1.run.app/api/v1/appointments/{appointment-id}/cancel?reason={reason}'
 ```
 
 ### Reschedule Appointment
 
 ```bash
-curl --location --request PATCH 'https://appointment-booking-1020741950373.africa-south1.run.app/api/v1/appointments/cc67cae9-4b5d-4c97-b030-95927df6eab6/reschedule?new_start_time=2026-08-21T23%3A00%3A00Z&new_end_time=2026-08-22T23%3A30%3A00Z'
+curl --location --request PATCH 'https://appointment-booking-1020741950373.africa-south1.run.app/api/v1/appointments/{appointment-id}/reschedule?new_start_time={start-time}&new_end_time={end-time}'
+
+# Start time = 2026-09-25T10:00:00%2B03:00  The %2B is to help the encoding
+# End time = 2026-09-25T10:30:00%2B03:00  The %2B is to help the encoding
 ```
 
 ### Get Patients Appointments
 
 ```bash
-curl --location 'https://appointment-booking-1020741950373.africa-south1.run.app/api/v1/api/v1/patients//appointments'
+curl --location 'https://appointment-booking-1020741950373.africa-south1.run.app/api/v1/patients/{patient-id}/appointments'
 ```
 
 ### Get Patients
@@ -87,14 +93,14 @@ curl --location 'https://appointment-booking-1020741950373.africa-south1.run.app
 
 ## Required Methods
 
-| Methods | url                            | params                                       | body                                                          |
-| ------- | ------------------------------ | -------------------------------------------- | ------------------------------------------------------------- |
-| `POST`  | `/appointments`                |                                              | `patient_id`, `doctor_id`, `start_time`, `end_time`, `status` |
-| `GET`   | `/doctors/:id/availability`    | doctor_id                                    |                                                               |
-| `PATCH` | `/appointments/:id/cancel`     | appointment_id, reason, patient_id           |                                                               |
-| `PATCH` | `/appointments/:id/reschedule` | appointment_id, new_start_time, new_end_time |                                                               |
-| `GET`   | `/patients/:id/appointments`   | patient_id                                   |                                                               |
-| `GET`   | `/health`                      | -                                            | -                                                             |
+| Methods | url                            | query params                                       | body                                                          |
+| ------- | ------------------------------ | -------------------------------------------------- | ------------------------------------------------------------- |
+| `POST`  | `/appointments`                |                                                    | `patient_id`, `doctor_id`, `start_time`, `end_time`, `status` |
+| `GET`   | `/doctors/:id/availability`    | `doctor_id`                                        |                                                               |
+| `PATCH` | `/appointments/:id/cancel`     | `appointment_id`, `reason`, `patient_id`           |                                                               |
+| `PATCH` | `/appointments/:id/reschedule` | `appointment_id`, `new_start_time`, `new_end_time` |                                                               |
+| `GET`   | `/patients/:id/appointments`   | -                                                  |                                                               |
+| `GET`   | `/health`                      | -                                                  | -                                                             |
 
 ## Supporting Methids
 

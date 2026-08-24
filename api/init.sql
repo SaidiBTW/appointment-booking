@@ -25,7 +25,9 @@ CREATE TABLE appointment_cancellations (
     appointment_id UUID NOT NULL REFERENCES appointments(id),
     patient_id UUID NOT NULL REFERENCES patients(id),
     reason TEXT NOT NULL,
-    cancelled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    cancelled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    UNIQUE (appointment_id, patient_id)
 );
 
 CREATE TABLE schedules (

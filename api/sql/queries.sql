@@ -6,7 +6,7 @@ $1, $2, $3, $4, $5
 ) RETURNING id, patient_id, doctor_id, start_time, end_time, status;
 
 -- name: GetAppointmentByID :one
-SELECT *FROM appointments 
+SELECT * FROM appointments 
 WHERE id = $1;
 
 -- name: GetAppointmentsByDoctorID :many

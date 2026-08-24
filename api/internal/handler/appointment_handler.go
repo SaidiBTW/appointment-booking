@@ -97,48 +97,47 @@ func (h *AppointmentHandler) CancelAppointment(ctx *gin.Context) {
 func (h *AppointmentHandler) RescheduleAppointment(ctx *gin.Context) {
 
 	appointmentID := ctx.Param("id")
-	newStartTime := ctx.Query("new_start_time")
-	newEndTime := ctx.Query("new_end_time")
+	var rescheduleDto dto.RescheduleAppointmentRequest
 
-	if appointmentID == "" || newStartTime == "" || newEndTime == "" {
-		ctx.JSON(http.StatusBadRequest, errors.BadRequestError("Missing required parameters", nil))
+	if err := ctx.ShouldBindQuery(&rescheduleDto); err != nil {
+		ctx.JSON(http.StatusBadRequest, errors.BadRequestError("Invalid request body validation", fmt.Errorf("invalid request body: %v", err.Error())))
 		return
 	}
+	fmt.Printf("Received reschedule request for appointment ID: %s with new start time: %s and new end time: %s\n", appointmentID, rescheduleDto.NewStartTime, rescheduleDto.NewEndTime)
+	err := Vaidate.Struct(rescheduleDto)
 
-	startTimeParsed, err := time.Parse(time.RFC3339, newStartTime)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errors.BadRequestError(fmt.Sprintf("Invalid date format. Please use RFC3339 format. Start time: %s", newStartTime), err))
+		ctx.JSON(http.StatusBadRequest, errors.BadRequestError(fmt.Sprintf("invalid request body: %v", err.Error()), fmt.Errorf("invalid request body: %v", err.Error())))
 		return
 	}
 
-	endTimeParsed, err := time.Parse(time.RFC3339, newEndTime)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errors.BadRequestError(fmt.Sprintf("Invalid date format. Please use RFC3339 format. End time: %s", newEndTime), err))
-		return
-	}
+	newStartTime := rescheduleDto.NewStartTime.Truncate(time.Minute * 15)
+	newEndTime := rescheduleDto.NewEndTime.Truncate(time.Minute * 15)
 
-	if startTimeParsed.Before(time.Now()) {
+	fmt.Printf("Rescheduling appointment with ID: %s to new start time: %s and new end time: %s\n", appointmentID, newStartTime, newEndTime)
+
+	if newStartTime.Before(time.Now()) {
 		ctx.JSON(http.StatusBadRequest, errors.BadRequestError("Start time cannot be in the past", fmt.Errorf("start time cannot be in the past")))
 		return
 	}
 
-	if endTimeParsed.Sub(startTimeParsed) <= 0 {
+	if newEndTime.Sub(newStartTime) <= 0 {
 		ctx.JSON(http.StatusBadRequest, errors.BadRequestError("End time must be after start time", fmt.Errorf("end time must be after start time")))
 		return
 	}
 
-	if endTimeParsed.Sub(startTimeParsed) != 30*time.Minute {
+	if newEndTime.Sub(newStartTime) != 30*time.Minute {
 		ctx.JSON(http.StatusBadRequest, errors.CustomError(400, "bad_request", "End time must be exactly 30 minutes after start time"))
 		return
 	}
-	if time.Until(startTimeParsed) < time.Hour {
+	if time.Until(newStartTime) < time.Hour {
 		ctx.JSON(http.StatusBadRequest, errors.BadRequestError("Cannot reschedule an appointment within 1 hour of the start time", fmt.Errorf("cannot reschedule an appointment within 1 hour of the start time")))
 		return
 	}
 
-	appointment, rescheduleError := h.svc.RescheduleAppointment(appointmentID, startTimeParsed, endTimeParsed)
+	appointment, rescheduleError := h.svc.RescheduleAppointment(appointmentID, newStartTime, newEndTime)
 	if rescheduleError != nil {
-		ctx.JSON(http.StatusInternalServerError, errors.InternalServerError(rescheduleError))
+		ctx.JSON(http.StatusInternalServerError, rescheduleError)
 		return
 	}
 

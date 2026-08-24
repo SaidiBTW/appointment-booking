@@ -145,7 +145,7 @@ func (q *Queries) CreateSchedule(ctx context.Context, arg CreateScheduleParams) 
 }
 
 const getAppointmentByID = `-- name: GetAppointmentByID :one
-SELECT id, patient_id, doctor_id, start_time, end_time, statusFROM appointments 
+SELECT id, patient_id, doctor_id, start_time, end_time, status FROM appointments 
 WHERE id = $1
 `
 

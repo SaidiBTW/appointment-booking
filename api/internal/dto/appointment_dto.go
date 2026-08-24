@@ -19,8 +19,8 @@ type CreateAppointmentResponse struct {
 }
 
 type RescheduleAppointmentRequest struct {
-	NewStartTime string `json:"new_start_time"`
-	NewEndTime   string `json:"new_end_time" validate:"gtefield=NewStartTime"`
+	NewStartTime time.Time `form:"new_start_time" time_format:"2006-01-02T15:04:05Z07:00" json:"new_start_time"`
+	NewEndTime   time.Time `form:"new_end_time" time_format:"2006-01-02T15:04:05Z07:00" json:"new_end_time" validate:"gtfield=NewStartTime"`
 }
 
 type RescheduleAppointmentResponse struct {

@@ -57,7 +57,7 @@ func (r *appointmentRepository) CreateAppointment(appointmentDto dto.CreateAppoi
 		// Check whether error is due to a unique constraint violation (appointment already exists)
 		var pqErr *pq.Error
 
-		if errors.As(err, &pqErr) && pqErr.Code == "23503" {
+		if errors.As(err, &pqErr) && pqErr.Code == "23505" {
 			return nil, custom_errors.BadRequestError("Appointment already exists", err)
 		}
 
@@ -100,30 +100,40 @@ func (r *appointmentRepository) RescheduleAppointment(appointmentID string, newS
 	ctx := context.Background()
 	queries := gen_queries.New(r.db)
 
-	appointmentsInRange, err := r.GetAppointmentsByDoctorIDAndStartAndEndTime(appointmentID, newStartTime, newEndTime)
+	appointment, err := r.GetAppointmentByID(appointmentID)
+	if err != nil {
+		return nil, err
+	}
+
+	if appointment.Status == "canceled" {
+		return nil, custom_errors.BadRequestError("Cannot reschedule a canceled appointment", fmt.Errorf("cannot reschedule a canceled appointment"))
+	}
+
+	appointmentsInRange, err := r.GetAppointmentsByDoctorIDAndStartAndEndTime(appointment.DoctorID, newStartTime, newEndTime)
 	if err != nil {
 		return nil, err
 	}
 	if len(appointmentsInRange) > 0 {
 		return nil, custom_errors.BadRequestError("Appointment time conflicts with existing appointments", fmt.Errorf("appointment time conflicts with existing appointments"))
 	}
-	appointment, updateError := queries.UpdateAppointment(ctx, gen_queries.UpdateAppointmentParams{
+	updatedAppointment, updateError := queries.UpdateAppointment(ctx, gen_queries.UpdateAppointmentParams{
 		PatientID: uuid.NullUUID{},
 		DoctorID:  uuid.NullUUID{},
 		StartTime: newStartTime,
 		EndTime:   newEndTime,
 		ID:        uuid.MustParse(appointmentID),
+		Status:    "scheduled",
 	})
 	if updateError != nil {
 		return nil, updateError
 	}
 	return &domain.Appointment{
-		ID:        appointment.ID.String(),
-		PatientID: appointment.PatientID.UUID.String(),
-		DoctorID:  appointment.DoctorID.UUID.String(),
-		StartTime: appointment.StartTime,
-		EndTime:   appointment.EndTime,
-		Status:    appointment.Status,
+		ID:        updatedAppointment.ID.String(),
+		PatientID: updatedAppointment.PatientID.UUID.String(),
+		DoctorID:  updatedAppointment.DoctorID.UUID.String(),
+		StartTime: updatedAppointment.StartTime,
+		EndTime:   updatedAppointment.EndTime,
+		Status:    updatedAppointment.Status,
 	}, nil
 }
 
@@ -135,19 +145,26 @@ func (r *appointmentRepository) CancelAppointment(appointmentID string, patientI
 		PatientID:     uuid.MustParse(patientID),
 		Reason:        reason,
 	})
+	var psqlErr *pq.Error
+	if errors.As(err, &psqlErr) && psqlErr.Code == "23505" {
+		return nil, custom_errors.BadRequestError("Appointment cancellation already exists", err)
+	}
 	if err != nil {
-		return nil, err
+		return nil, custom_errors.InternalServerError(err)
 	}
 	err = queries.UpdateAppointmentStatus(ctx, gen_queries.UpdateAppointmentStatusParams{
 		Status: "canceled",
 		ID:     uuid.MustParse(appointmentID),
 	})
+	if err != nil {
+		return nil, custom_errors.InternalServerError(err)
+	}
 	return &domain.AppointmentCancellation{
 		ID:            cancellation.ID.String(),
 		AppointmentID: cancellation.AppointmentID.String(),
 		PatientID:     cancellation.PatientID.String(),
 		Reason:        cancellation.Reason,
-	}, err
+	}, nil
 }
 
 func (r *appointmentRepository) GetAppointmentsByDoctorID(doctorID string) ([]*domain.Appointment, error) {
@@ -231,16 +248,4 @@ func (r *appointmentRepository) GetAppointmentsByPatientID(patientID string) ([]
 
 	return appointments, nil
 
-}
-
-func getTimeUntilNonUtc(startTime time.Time) time.Duration {
-	// Get the current time in UTC
-	currentTimeUTC := time.Now()
-
-	startTimeUTC := startTime
-
-	// Calculate the duration until the start time
-	durationUntilStart := startTimeUTC.Sub(currentTimeUTC)
-
-	return durationUntilStart
 }

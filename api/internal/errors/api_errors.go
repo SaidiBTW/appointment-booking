@@ -52,7 +52,7 @@ func InternalServerError(err error) *APIError {
 	return &APIError{
 		StatusCode: 500,
 		Code:       "internal_server_error",
-		Message:    "An internal server error occurred",
+		Message:    err.Error(),
 		Err:        err,
 	}
 }
