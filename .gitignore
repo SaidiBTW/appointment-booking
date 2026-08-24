@@ -5,6 +5,7 @@
 .env
 
 run-docker.sh
+run-built-image.sh
 
 # Test coverage & binaries
 *.out
@@ -30,3 +31,6 @@ Thumbs.db
 # Docker local data mounts / logs
 *.log
 docker-data/
+
+# Ignore generated credentials from google-github-actions/auth
+gha-creds-*.json
