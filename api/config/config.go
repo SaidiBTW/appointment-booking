@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 	"strconv"
 )
@@ -11,7 +12,6 @@ type PostgresConfig struct {
 	User     string `mapstructure:"user"`
 	Password string `mapstructure:"password"`
 	DBName   string `mapstructure:"dbname"`
-	SSLMode  string `mapstructure:"sslmode"`
 }
 
 func DefaultPostgresConfig() *PostgresConfig {
@@ -21,7 +21,6 @@ func DefaultPostgresConfig() *PostgresConfig {
 		User:     "postgres",
 		Password: "password",
 		DBName:   "appointment_booking",
-		SSLMode:  "disable",
 	}
 }
 
@@ -33,9 +32,9 @@ func Load() (*PostgresConfig, error) {
 	user := os.Getenv("DATABASE_USER")
 	password := os.Getenv("DATABASE_PASSWORD")
 	dbname := os.Getenv("DATABASE_NAME")
-	sslmode := os.Getenv("DATABASE_SSLMODE")
 
-	if host == "" || port == "" || user == "" || password == "" || dbname == "" || sslmode == "" {
+	if host == "" || port == "" || user == "" || password == "" || dbname == "" {
+		log.Println("Environment variables for database configuration are not set. Using default configuration.")
 		return DefaultPostgresConfig(), nil
 	}
 
@@ -45,7 +44,6 @@ func Load() (*PostgresConfig, error) {
 		User:     user,
 		Password: password,
 		DBName:   dbname,
-		SSLMode:  sslmode,
 	}, nil
 }
 

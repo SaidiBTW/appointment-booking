@@ -20,6 +20,7 @@ import (
 func main() {
 	err := godotenv.Load()
 	postgresConfig, err := config.Load()
+	fmt.Println("Postgres Config:", postgresConfig)
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}
