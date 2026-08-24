@@ -28,6 +28,7 @@ func DefaultPostgresConfig() *PostgresConfig {
 func Load() (*PostgresConfig, error) {
 	// Load configuration from environment variables or a config file
 	// For simplicity, we will return the default configuration here
+	defaultConfig := DefaultPostgresConfig()
 	host := os.Getenv("DATABASE_HOST")
 	port := os.Getenv("DATABASE_PORT")
 	user := os.Getenv("DATABASE_USER")
@@ -35,8 +36,12 @@ func Load() (*PostgresConfig, error) {
 	dbname := os.Getenv("DATABASE_NAME")
 	sslmode := os.Getenv("DATABASE_SSLMODE")
 
-	if host == "" || port == "" || user == "" || password == "" || dbname == "" || sslmode == "" {
-		return DefaultPostgresConfig(), nil
+	if host == "" || port == "" || user == "" || password == "" || dbname == "" {
+		return defaultConfig, nil
+	}
+
+	if sslmode == "" {
+		sslmode = defaultConfig.SSLMode
 	}
 
 	return &PostgresConfig{
