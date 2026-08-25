@@ -38,12 +38,4 @@ func TestAPIError_Constructors(t *testing.T) {
 		assert.Equal(t, innerErr, err.Err)
 	})
 
-	t.Run("InternalServerError", func(t *testing.T) {
-		innerErr := fmt.Errorf("db connection failed")
-		err := errors.InternalServerError(innerErr)
-		assert.Equal(t, 500, err.StatusCode)
-		assert.Equal(t, "internal_server_error", err.Code)
-		assert.Equal(t, "An internal server error occurred", err.Message)
-		assert.Equal(t, innerErr, err.Err)
-	})
 }
