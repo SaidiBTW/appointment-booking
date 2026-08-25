@@ -158,3 +158,10 @@ The CI/CD is handled on Google Cloud Build using triggers.
 ## AI Reflection
 
 The AI reflection files is [available here](./Ai_review.md)
+
+## Possible Improvements
+
+- Moving to **Cloud SQL** to ensure the entire architecture sits with one environments and using private IPs ie., internal addressing to improve security
+- Utilizing **authentication** to ensure that cancellations and reschedules can only be done by a party that is authorized to perform that action.
+- More standard error handling by designing for more failure cases and ensuring that downstream services all follow the same defined standard.
+- Implmenting **Observability** by improving on the current uptime health check at `/health` to satisfy more stringent SLIs e.g., latency.
